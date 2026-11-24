@@ -4,7 +4,7 @@ description: 在 Unity 加上鏡頭震動（創傷值 trauma 模型）、開槍�
 license: MIT
 metadata:
   author: yayapipi
-  version: "1.0.1"
+  version: "1.1.0"
 ---
 
 # 鏡頭震動

@@ -4,7 +4,7 @@ description: 幫 Unity 遊戲全面加上 Juice（遊戲手感、打擊感、回
 license: MIT
 metadata:
   author: yayapipi
-  version: "1.0.1"
+  version: "1.1.0"
 ---
 
 # Juice Audit：盤點、排序、逐一套用
@@ -103,6 +103,20 @@ Time.timeScale = paused ? 0f : 1f;
 | 特大 | Boss 死亡、大爆炸、過關 | 0.7–1 | 0.15–0.2 秒 |
 
 配方最後一個參數 `power` 就是用來做層次的：`Juice.Hit(target, point, 0.5f)` 是輕擊，`2f` 是重擊。
+
+### 4.5 角色沒有臉的時候：加眼睛
+
+主角或敵人只是方塊、圓球、膠囊的時候，加上眼睛是最便宜的「個性」。只在使用者想要、或物件明顯是角色時才加，不要替子彈、牆壁、道具加。
+
+```csharp
+JuiceEyes eyes = JuiceEyes.Attach(transform);             // 加上眼睛。第二次呼叫會拿回同一個
+JuiceEyes.Attach(transform, 0.3f, 0.5f, true);            // 眼睛直徑、兩眼距離、要不要嘴巴
+eyes.LookAt(player);                                      // 一直看著某個物件，也可以給座標
+eyes.Squint();                                            // 被打到的那一行
+eyes.Widen();                                             // 危險靠近、驚訝的那一行
+```
+
+眼睛直徑大約是身體寬度的四分之一。身體很扁時把 `eyes.mouthDrop` 設成 0.1，嘴巴會夾在兩眼中間。眼睛是 2D 的，用在 2D 遊戲或永遠正對鏡頭的物件。
 
 ### 5. 無障礙
 

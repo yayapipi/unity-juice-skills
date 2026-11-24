@@ -4,16 +4,16 @@
 
 不需要付費插件，不需要任何素材，MIT 授權。
 
-**▶ [線上試玩 Demo](https://yayapipi.github.io/unity-juice-skills/)**：不用安裝，在瀏覽器裡點方塊，把回饋一項一項打開。
+**▶ [線上試玩 Demo](https://yayapipi.github.io/unity-juice-skills/)**：不用安裝，在瀏覽器裡玩一場打磚塊，再把回饋一項一項關掉，看看少了什麼。
 
-[![Juice Kit 的示範場景：方塊被打到時閃白、噴出火花、跳出傷害數字](docs/demo.png)](https://yayapipi.github.io/unity-juice-skills/)
+[![Juice Kit 的展示場景：有眼睛的磚塊與板子、拖尾、碎片、連擊分數](docs/demo.png)](https://yayapipi.github.io/unity-juice-skills/)
 
 ## 這是什麼
 
 Juice 是「最小的輸入，換來最大的回饋」：玩法不變，只放大每個動作的感受。這個 Repo 有兩樣東西：
 
 - **12 個 Agent Skill**（`skills/`）：教 AI 什麼時候該加哪一種回饋、數值從多少開始、要避開哪些坑。格式是開放的 [Agent Skills](https://agentskills.io) 標準。
-- **Juice Kit**（`skills/juice-kit/unity/Juice`）：24 個 C# 腳本加兩個 Shader。畫面與聲音全部用程式產生，一行就能用：
+- **Juice Kit**（`skills/juice-kit/unity/Juice`）：28 個 C# 腳本加兩個 Shader。畫面與聲音全部用程式產生，一行就能用：
 
 ```csharp
 Juice.Hit(enemy.gameObject, hitPoint);   // 頓幀＋鏡頭震動＋閃白＋彈一下＋火花＋音效
@@ -67,12 +67,12 @@ npx skills add yayapipi/unity-juice-skills
 | `juice-audit` | 入口。盤點遊戲裡的事件、排優先順序、逐一加上回饋 | 幫我的遊戲加 Juice |
 | `juice-kit` | 安裝與更新 Juice Kit 腳本 | 安裝 Juice Kit |
 | `juice-feedback` | 把一個事件的回饋集中在一個元件，在 Inspector 調 | 我想自己調數值 |
-| `juice-squash-stretch` | 擠壓、拉伸、彈一下 | 讓角色落地的時候壓扁再彈回來 |
+| `juice-squash-stretch` | 擠壓、拉伸、彈一下，以及彈簧式的移動 | 讓角色落地的時候壓扁再彈回來 |
 | `juice-screen-shake` | 鏡頭震動、後座、推近 | 爆炸的時候畫面要震 |
 | `juice-hit-stop` | 頓幀、慢動作 | 打中的時候頓一下 |
 | `juice-hit-flash` | 受擊閃白 | 敵人被打到要閃白 |
 | `juice-particles` | 火花、塵土、爆炸、彩帶、拖尾 | 打到牆壁要噴火花 |
-| `juice-sfx` | 音高隨機、連擊音階、內建合成音 | 幫每個動作加音效 |
+| `juice-sfx` | 音高隨機、連擊音階、內建合成音、背景音樂 | 幫每個動作加音效 |
 | `juice-ui` | 按鈕回彈、數字滾動、飄字、打字機、轉場 | 讓按鈕按起來有感覺 |
 | `juice-jump-forgiveness` | 土狼時間、跳躍緩衝、可變跳躍高度 | 我明明有按跳卻沒跳 |
 | `juice-camera-follow` | 鏡頭阻尼跟隨、前視、死區 | 鏡頭跟得太死了 |
@@ -103,9 +103,13 @@ JuiceShake.Add(0.4f);                         // 鏡頭震動 0–1
 JuiceTime.HitStop(0.06f);                     // 頓幀 0.06 秒
 JuiceFlash.Play(gameObject);                  // 閃白
 JuiceSquash.Squash(transform, 0.25f);         // 壓扁
+JuiceSpring.Nudge(transform, Vector3.down * 0.3f);  // 推一下，用彈簧彈回原位
+JuiceSpring.DropIn(transform, Vector3.up * 6f);     // 出場：從上方掉進來
+JuiceEyes.Attach(transform).LookAt(player);   // 加上眼睛，一直看著玩家
 JuiceBurst.Spark(hitPoint, hitNormal);        // 火花
 JuiceSfx.Blip(JuiceBlip.Jump);                // 內建合成音效
 JuiceSfx.Play(clip);                          // 自己的音效，音高自動隨機
+JuiceMusic.Play();                            // 背景音樂（沒有音樂檔時用內建的循環）
 JuiceFloatingText.Spawn(point, "+1");         // 飄字
 JuiceFade.LoadScene("Level2");                // 淡出淡入換場景
 ```
@@ -132,9 +136,12 @@ UI 元件掛上去就會動：`JuiceButton`（按鈕）、`JuiceCounter`（數�
 
 不用開 Unity 也能玩：[線上 Demo](https://yayapipi.github.io/unity-juice-skills/)（網頁版的做法在 [webdemo](webdemo/README.md)）。
 
-在自己的專案裡看：裝好 Juice Kit 之後，Unity 選單 `Tools ▸ Juice ▸ Create Demo Scene`，按 Play。
+裝好 Juice Kit 之後，專案裡有兩個示範，都不需要任何素材：
 
-畫面左邊有七個開關：音效、擠壓拉伸、閃白、粒子、鏡頭震動、頓幀、傷害數字。一開始全部關閉，用滑鼠點方塊，再一項一項打開，就能感受同一個遊戲差在哪裡。
+- **完整展示**：選單 `Tools ▸ Juice ▸ Create Showcase Scene`，按 Play。這是一個打磚塊小遊戲，線上 Demo 就是它。移動滑鼠控制板子，滑鼠不動的時候它會自己玩，點一下多一顆球。左邊有十一個開關：彈簧、擠壓拉伸、眼睛、拖尾、粒子、閃白、鏡頭震動、頓幀、飄字、音效、音樂，一開始全部打開，可以一項一項關掉。
+- **最小示範**：選單 `Tools ▸ Juice ▸ Create Demo Scene`，按 Play。五個方塊、七個開關，一開始全部關閉，用滑鼠點方塊，再一項一項打開。
+
+想知道某種回饋怎麼寫，打開 `Assets/Juice/Demo/JuiceShowcase.cs`，看 `OnBrick`、`OnPaddle`、`OnWall` 三個函式，每一種回饋都是一行。
 
 ## 無障礙
 

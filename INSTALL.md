@@ -81,6 +81,6 @@ Copy-Item -Recurse -Force "<Repo>\skills\juice-kit\unity\Juice\*" "<專案>\Asse
 - 裝了 12 個 Skill 與 Juice Kit，各放在哪裡。
 - 有些 Agent 要重新開啟對話或重新啟動才會讀到新的 Skill。
 - 接下來可以直接說：「幫我的遊戲加 Juice」，或是「在玩家受傷的時候加上鏡頭震動」。
-- Unity 選單 `Tools ▸ Juice ▸ Create Demo Scene` 可以看示範。
+- Unity 選單 `Tools ▸ Juice ▸ Create Showcase Scene` 可以看完整展示（一個打磚塊小遊戲）。
 
 不要順手幫使用者的遊戲加任何效果；這一步只負責安裝。

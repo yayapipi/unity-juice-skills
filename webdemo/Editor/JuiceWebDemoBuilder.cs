@@ -7,7 +7,7 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 
 /// <summary>
-/// 把 Juice Kit 的示範場景打包成網頁版（WebGL）。線上 Demo 就是用這支腳本做出來的。
+/// 把 Juice Kit 的完整展示（JuiceShowcase）打包成網頁版（WebGL）。線上 Demo 就是用這支腳本做出來的。
 ///
 /// 專案裡要先有 Assets/Juice（Juice Kit）與 Assets/WebGLTemplates/JuiceDemo（示範頁的範本）。
 /// 命令列：
@@ -41,9 +41,9 @@ public static class JuiceWebDemoBuilder
 
     static bool Run(string output)
     {
-        // 場景只有預設的鏡頭與燈光，加上一個 JuiceDemo 元件；其他東西都由程式在執行時產生
+        // 場景只有預設的鏡頭與燈光，加上一個 JuiceShowcase 元件；其他東西都由程式在執行時產生
         var scene = EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
-        JuiceMenu.AddDemoToScene();
+        JuiceMenu.AddShowcaseToScene();
         if (!AssetDatabase.IsValidFolder(SceneFolder)) AssetDatabase.CreateFolder("Assets", "JuiceWebDemo");
         if (!EditorSceneManager.SaveScene(scene, ScenePath))
         {

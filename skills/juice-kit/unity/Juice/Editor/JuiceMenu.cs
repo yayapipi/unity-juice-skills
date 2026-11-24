@@ -21,6 +21,40 @@ public static class JuiceMenu
         AddDemoToScene();
     }
 
+    [MenuItem("Tools/Juice/Create Showcase Scene")]
+    public static void CreateShowcaseScene()
+    {
+        if (EditorApplication.isPlaying)
+        {
+            Debug.LogWarning("[Juice] 請先停止 Play 再建立展示場景。");
+            return;
+        }
+        if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+        EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
+        AddShowcaseToScene();
+    }
+
+    /// <summary>在目前的場景加入完整展示（打磚塊小遊戲）。AI Agent 可以直接呼叫。</summary>
+    public static void AddShowcaseToScene()
+    {
+#if UNITY_2023_1_OR_NEWER
+        JuiceShowcase existing = Object.FindAnyObjectByType<JuiceShowcase>();
+#else
+        JuiceShowcase existing = Object.FindObjectOfType<JuiceShowcase>();
+#endif
+        if (existing != null)
+        {
+            Selection.activeGameObject = existing.gameObject;
+            Debug.Log("[Juice] 場景裡已經有 Juice Showcase 了，按 Play 開始。");
+            return;
+        }
+        GameObject go = new GameObject("Juice Showcase");
+        go.AddComponent<JuiceShowcase>();
+        Undo.RegisterCreatedObjectUndo(go, "Add Juice Showcase");
+        Selection.activeGameObject = go;
+        Debug.Log("[Juice] 已加入 Juice Showcase，按 Play 開始。移動滑鼠控制板子，左邊的開關可以一項一項關掉。");
+    }
+
     [MenuItem("Tools/Juice/Add Demo To Current Scene")]
     public static void AddDemoToScene()
     {

@@ -10,6 +10,7 @@ public static class JuiceAssets
     static Texture2D circleTexture;
     static Sprite squareSprite;
     static Font font;
+    static Sprite circleSprite;
 
     /// <summary>粒子用的材質（圓形、吃頂點顏色）。</summary>
     public static Material ParticleMaterial
@@ -66,6 +67,37 @@ public static class JuiceAssets
                 circleTexture.Apply(false, true);
             }
             return circleTexture;
+        }
+    }
+
+    /// <summary>直徑 1 單位的白色圓形 Sprite，眼睛、球與佔位圖用。</summary>
+    public static Sprite CircleSprite
+    {
+        get
+        {
+            if (circleSprite == null)
+            {
+                const int size = 64;
+                Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+                tex.name = "Juice Circle Sprite";
+                tex.wrapMode = TextureWrapMode.Clamp;
+                Color32[] pixels = new Color32[size * size];
+                float half = (size - 1) * 0.5f;
+                for (int y = 0; y < size; y++)
+                {
+                    for (int x = 0; x < size; x++)
+                    {
+                        float d = Mathf.Sqrt((x - half) * (x - half) + (y - half) * (y - half));
+                        float a = Mathf.Clamp01(half - d + 0.5f);
+                        pixels[y * size + x] = new Color32(255, 255, 255, (byte)(a * 255f));
+                    }
+                }
+                tex.SetPixels32(pixels);
+                tex.Apply(false, true);
+                circleSprite = Sprite.Create(tex, new Rect(0f, 0f, size, size), new Vector2(0.5f, 0.5f), size);
+                circleSprite.name = "Juice Circle";
+            }
+            return circleSprite;
         }
     }
 

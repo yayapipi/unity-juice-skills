@@ -4,17 +4,17 @@ description: 把 Juice Kit（一組不需要素材、不需要付費插件的 Un
 license: MIT
 metadata:
   author: yayapipi
-  version: "1.0.1"
+  version: "1.1.0"
 ---
 
 # Juice Kit：安裝與總覽
 
-Juice Kit 是 24 個 C# 腳本加兩個 Shader（每個檔案旁邊有一個 Unity 用的 `.meta`）。全部用程式產生畫面與聲音，不需要任何素材、Prefab 或付費插件。其他 `juice-*` Skill 都是在教你怎麼用這些腳本。
+Juice Kit 是 28 個 C# 腳本加兩個 Shader（每個檔案旁邊有一個 Unity 用的 `.meta`）。全部用程式產生畫面與聲音，不需要任何素材、Prefab 或付費插件。其他 `juice-*` Skill 都是在教你怎麼用這些腳本。
 
 ## 安裝步驟
 
 1. **找到 Unity 專案根目錄**：同時有 `Assets/` 與 `ProjectSettings/` 的那個資料夾。
-2. **檢查是否已安裝**：如果 `Assets/Juice/Juice.cs` 已經存在，讀裡面的 `Version`。跟這份 Skill 的版本（1.0.1）相同就不用重裝，直接結束。
+2. **檢查是否已安裝**：如果 `Assets/Juice/Juice.cs` 已經存在，讀裡面的 `Version`。跟這份 Skill 的版本（1.1.0）相同就不用重裝，直接結束。
 3. **複製內容**：把這個 Skill 資料夾裡 `unity/Juice/` **裡面的內容**複製到專案的 `Assets/Juice/`，子資料夾 `UI`、`Resources`、`Demo`、`Editor` 與所有 `.meta` 檔都要保留。第一次安裝與更新舊版都用同一組指令，同名檔案會被覆蓋：
    - macOS、Linux：`mkdir -p "<專案>/Assets/Juice" && cp -R "<這個 Skill 的路徑>/unity/Juice/." "<專案>/Assets/Juice/"`
    - Windows PowerShell：`New-Item -ItemType Directory -Force "<專案>\Assets\Juice" | Out-Null; Copy-Item -Recurse -Force "<這個 Skill 的路徑>\unity\Juice\*" "<專案>\Assets\Juice\"`
@@ -22,7 +22,7 @@ Juice Kit 是 24 個 C# 腳本加兩個 Shader（每個檔案旁邊有一個 Uni
    - 如果這個 Skill 資料夾裡沒有 `unity/Juice`，從 GitHub 取得：`git clone --depth 1 https://github.com/yayapipi/unity-juice-skills`，來源是 `skills/juice-kit/unity/Juice`。
 4. **檢查 uGUI**：`Packages/manifest.json` 沒有 `com.unity.ugui` 的話，刪掉 `Assets/Juice/UI/` 與 `Assets/Juice/UI.meta`（裡面兩個檔案需要 Unity UI）。
 5. **等 Unity 編譯**，確認 Console 沒有錯誤。你有工具可以讀 Console（Unity CLI、Unity MCP）就自己讀；沒有就請使用者切回 Unity 看一眼。
-6. **回報**：告訴使用者裝在哪裡，以及可以用選單 `Tools ▸ Juice ▸ Create Demo Scene` 看示範。
+6. **回報**：告訴使用者裝在哪裡，以及可以用選單 `Tools ▸ Juice ▸ Create Showcase Scene` 看完整展示。
 
 `.meta` 檔裡是固定的 GUID，一定要跟著複製：場景與 Prefab 是靠 GUID 找到 `JuiceFeedback`、`JuiceButton` 這些元件的，少了它，之後更新 Kit 時場景裡的元件會變成 Missing Script。`Assets/Juice` 資料夾本身的 `.meta` 由 Unity 自己產生。
 
@@ -38,10 +38,13 @@ Juice Kit 預設編進 `Assembly-CSharp`，放在 asmdef 裡的腳本引用不�
 | `JuiceShake` | 鏡頭震動、後座、推近 | `JuiceShake.Add(0.4f);` |
 | `JuiceTime` | 頓幀、慢動作 | `JuiceTime.HitStop(0.06f);` |
 | `JuiceSquash` | 擠壓、拉伸、彈一下 | `JuiceSquash.Squash(transform);` |
+| `JuiceSpring` | 彈簧式的移動：推一下彈回、搖晃、掉進場、跟隨 | `JuiceSpring.Nudge(transform, Vector3.down * 0.3f);` |
+| `JuiceEyes` | 替物件加上會看東西、會眨眼的眼睛 | `JuiceEyes.Attach(transform);` |
 | `JuiceFlash` | 閃白 | `JuiceFlash.Play(gameObject);` |
 | `JuiceBurst` | 火花、塵土、爆炸、彩帶 | `JuiceBurst.Spark(point);` |
 | `JuiceTrail` | 拖尾 | `JuiceTrail.Attach(gameObject, Color.cyan);` |
 | `JuiceSfx` | 音高隨機、連擊音階、內建合成音 | `JuiceSfx.Blip(JuiceBlip.Jump);` |
+| `JuiceMusic` | 背景音樂的淡入淡出，附一段內建的合成循環 | `JuiceMusic.Play();` |
 | `JuiceFloatingText` | 傷害數字、飄字 | `JuiceFloatingText.Spawn(point, "12");` |
 | `JuiceFeedback` | 把上面全部放在一個元件，在 Inspector 調 | `feedback.PlayAt(point);` |
 | `JuiceButton` | UI 按鈕的滑過、按下、彈回 | 掛在按鈕上 |
@@ -82,8 +85,12 @@ Juice Kit 預設編進 `Assembly-CSharp`，放在 asmdef 裡的腳本引用不�
 
 ## 示範場景
 
-- 人：選單 `Tools ▸ Juice ▸ Create Demo Scene`，按 Play，用左邊的開關一項一項打開回饋。
-- AI Agent：呼叫 `JuiceMenu.AddDemoToScene();`（不會跳對話框），再進入 Play 模式。
+有兩個，都不需要任何素材：
+
+- **完整展示**（`JuiceShowcase`）：一個打磚塊小遊戲，所有回饋一開始都是打開的，左邊的開關可以一項一項關掉。人用選單 `Tools ▸ Juice ▸ Create Showcase Scene`；AI Agent 呼叫 `JuiceMenu.AddShowcaseToScene();`。想知道某種回饋怎麼寫，讀 `Assets/Juice/Demo/JuiceShowcase.cs` 裡的 `OnBrick`、`OnPaddle`、`OnWall`。
+- **最小示範**（`JuiceDemo`）：五個方塊、七個開關，一開始全部關閉。人用選單 `Tools ▸ Juice ▸ Create Demo Scene`；AI Agent 呼叫 `JuiceMenu.AddDemoToScene();`。
+
+兩個呼叫都不會跳對話框，加完再進入 Play 模式。
 
 ## 無障礙
 

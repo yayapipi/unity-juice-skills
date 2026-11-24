@@ -1,10 +1,10 @@
 ---
 name: juice-sfx
-description: 在 Unity 加上音效回饋：每次播放音高隨機（連打不膩）、連擊時音階上升、十種不需要音檔的內建合成音效（按鈕、跳躍、落地、命中、受傷、撿取、金幣、爆炸、升級、失敗）。不用在場景裡放 AudioSource。使用者提到音效、沒有聲音、聲音很單調、音高隨機、連擊音效、按鈕音、SFX、sound effect、pitch variation、audio feedback 時使用。
+description: 在 Unity 加上音效回饋與背景音樂：每次播放音高隨機（連打不膩）、連擊時音階上升、十種不需要音檔的內建合成音效（按鈕、跳躍、落地、命中、受傷、撿取、金幣、爆炸、升級、失敗）。背景音樂可以淡入淡出、交叉淡化，沒有音樂檔時有一段內建的合成循環。不用在場景裡放 AudioSource。使用者提到音效、背景音樂、BGM、音樂淡出、沒有聲音、聲音很單調、音高隨機、連擊音效、按鈕音、SFX、sound effect、pitch variation、audio feedback 時使用。
 license: MIT
 metadata:
   author: yayapipi
-  version: "1.0.1"
+  version: "1.1.0"
 ---
 
 # 音效
@@ -60,11 +60,28 @@ JuiceSfx.Blip(JuiceBlip.Hit, volume: 0.5f, pitchJitter: 0.08f, pitch: 1f);
 
 每秒都會響的聲音（腳步、射擊）音量 0.2–0.4；偶爾才響的重要聲音（受傷、擊殺、過關）0.6–1。全部一樣大聲，重要的就聽不出來。
 
+## 背景音樂
+
+```csharp
+JuiceMusic.Play();                  // 還沒有音樂檔：先用內建的合成循環（16 秒，120 BPM）
+JuiceMusic.Play(myClip);            // 自己的音樂，0.5 秒淡入；正在播別首會交叉淡化
+JuiceMusic.Play(bossClip, 1f, 140f);// 淡入 1 秒，並告訴它這首是 140 BPM
+JuiceMusic.Stop();                  // 淡出
+JuiceMusic.Duck(0.3f, 0.6f);        // 大爆炸、過關音效、對話：音樂壓到三成，0.6 秒後自己回來
+```
+
+- 音樂要比音效小聲：`JuiceMusic.Volume` 預設 0.5，音效蓋不過音樂時先調低音樂。
+- 換場景不用重新播放，音樂會接著播；換歌直接再呼叫一次 `Play`。
+- 讓畫面跟著節拍動：`JuiceMusic.BeatPulse` 每一拍從 1 掉到 0，可以乘在背景亮度或物件大小上。
+- 暫停選單打開時音樂照常播放（不受 `Time.timeScale` 影響）。想要暫停時變小聲，呼叫 `JuiceMusic.Duck(0.4f, 9999f)`，關閉選單時 `JuiceMusic.Duck(1f, 0f)`。
+
 ## 設定選單
 
 ```csharp
 JuiceSfx.Volume = slider.value;   // 音效總音量 0–1
 JuiceSfx.Muted = true;            // 靜音
+JuiceMusic.Volume = slider.value; // 音樂音量 0–1
+JuiceMusic.Muted = true;          // 音樂靜音
 ```
 
 這兩個值不會自動存檔，要存的話用 `PlayerPrefs`。專案已經用 AudioMixer 管音量的話，這個 Skill 的聲音不會經過 Mixer，要請使用者知道。
@@ -77,4 +94,4 @@ JuiceSfx.Muted = true;            // 靜音
 
 ## 回報
 
-列出每個動作現在用的是內建合成音還是音檔，並附上找免費音效的地方：sfxr.me（自己做 8-bit 音效）、freesound.org、kenney.nl。
+列出每個動作現在用的是內建合成音還是音檔、背景音樂用的是內建循環還是音檔，並附上找免費音效的地方：sfxr.me（自己做 8-bit 音效）、freesound.org、kenney.nl。

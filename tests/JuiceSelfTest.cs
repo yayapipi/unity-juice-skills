@@ -637,6 +637,248 @@ public class JuiceSelfTest : MonoBehaviour
 
         Check(Mathf.Approximately(Time.timeScale, 1f), "time scale is 1 at the end");
 
+        // ---------------------------------------------------------------- JuiceSpring
+        {
+            float x = 0f, v = 0f, peak = 0f;
+            for (int i = 0; i < 240; i++)
+            {
+                x = JuiceSpring.Step(x, ref v, 1f, 4f, 0.3f, 1f / 60f);
+                peak = Mathf.Max(peak, x);
+            }
+            Check(peak > 1.05f, "JuiceSpring.Step: overshoots when damping is low (peak " + peak.ToString("0.00") + ")");
+            Check(Mathf.Abs(x - 1f) < 0.01f, "JuiceSpring.Step: settles on the target");
+            x = 0f; v = 0f; peak = 0f;
+            for (int i = 0; i < 240; i++)
+            {
+                x = JuiceSpring.Step(x, ref v, 1f, 4f, 1f, 1f / 60f);
+                peak = Mathf.Max(peak, x);
+            }
+            Check(peak <= 1.001f && Mathf.Abs(x - 1f) < 0.01f, "JuiceSpring.Step: no overshoot at damping 1");
+
+            GameObject body = new GameObject("Spring Test");
+            Transform bt = body.transform;
+            bt.position = new Vector3(30f, 0f, 0f);
+            JuiceSpring.Nudge(bt, Vector3.right * 0.5f);
+            yield return null;
+            Check(bt.position.x - 30f > 0.1f, "JuiceSpring.Nudge: pushes the object away");
+            yield return WaitReal(1.5f);
+            Check(Mathf.Abs(bt.position.x - 30f) < 0.01f, "JuiceSpring.Nudge: comes back to where it was");
+            Check(!body.GetComponent<JuiceSpring>().enabled, "JuiceSpring: goes to sleep once settled");
+
+            JuiceSpring.Nudge(bt, Vector3.up * 0.5f);
+            for (int i = 0; i < 30; i++)
+            {
+                bt.position += Vector3.right * 0.01f;
+                yield return null;
+            }
+            yield return WaitReal(1.5f);
+            Check(Mathf.Abs(bt.position.x - 30.3f) < 0.02f && Mathf.Abs(bt.position.y) < 0.02f,
+                "JuiceSpring: keeps movement made by other code, no drift (" + bt.position.x.ToString("0.000") + ", " + bt.position.y.ToString("0.000") + ")");
+
+            JuiceSpring.Wobble(bt, 20f);
+            yield return null;
+            Check(Mathf.Abs(Mathf.DeltaAngle(0f, bt.eulerAngles.z)) > 3f, "JuiceSpring.Wobble: tilts the object");
+            yield return WaitReal(1.5f);
+            Check(Mathf.Abs(Mathf.DeltaAngle(0f, bt.eulerAngles.z)) < 0.5f, "JuiceSpring.Wobble: ends upright");
+
+            JuiceSpring.DropIn(bt, Vector3.up * 3f, 0.25f);
+            Check(bt.position.y > 2.5f, "JuiceSpring.DropIn: starts at the offset");
+            yield return WaitReal(0.1f);
+            Check(bt.position.y > 2.5f, "JuiceSpring.DropIn: waits for the delay");
+            yield return WaitReal(1.9f);
+            Check(Mathf.Abs(bt.position.y) < 0.02f, "JuiceSpring.DropIn: lands on the rest position");
+
+            JuiceSpring.MoveTo(bt, new Vector3(32f, 0f, 0f));
+            Check(Mathf.Abs(bt.position.x - 30.3f) < 0.05f, "JuiceSpring.MoveTo: starts from where the object is");
+            peak = 0f;
+            float moveUntil = Time.realtimeSinceStartup + 1.8f;
+            while (Time.realtimeSinceStartup < moveUntil)
+            {
+                peak = Mathf.Max(peak, bt.position.x);
+                yield return null;
+            }
+            Check(peak > 32.02f, "JuiceSpring.MoveTo: overshoots a little (" + peak.ToString("0.00") + ")");
+            Check(Mathf.Abs(bt.position.x - 32f) < 0.02f, "JuiceSpring.MoveTo: arrives");
+
+            GameObject leader = new GameObject("Spring Leader");
+            leader.transform.position = new Vector3(34f, 1f, 0f);
+            JuiceSpring.Follow(bt, leader.transform);
+            yield return WaitReal(1.8f);
+            Check((bt.position - leader.transform.position).magnitude < 0.03f, "JuiceSpring.Follow: reaches the target");
+            leader.transform.position = new Vector3(36f, 1f, 0f);
+            yield return null;
+            yield return null;
+            Check(bt.position.x < 35.9f && bt.position.x > 34f, "JuiceSpring.Follow: lags behind a moving target");
+            Destroy(body);
+            Destroy(leader);
+        }
+
+        // ---------------------------------------------------------------- JuiceEyes
+        {
+            GameObject body = new GameObject("Eyes Test");
+            body.transform.position = new Vector3(30f, -3f, 0f);
+            body.transform.localScale = new Vector3(2f, 0.5f, 1f);
+            SpriteRenderer bodyRenderer = body.AddComponent<SpriteRenderer>();
+            bodyRenderer.sprite = JuiceAssets.SquareSprite;
+            bodyRenderer.sortingOrder = 7;
+            JuiceEyes eyes = JuiceEyes.Attach(body.transform, 0.3f, 0.5f, true);
+            Check(eyes != null && body.transform.Find("Juice Eyes") != null, "JuiceEyes.Attach: adds the eyes");
+            JuiceEyes again = JuiceEyes.Attach(body.transform, 0.3f, 0.5f, true);
+            yield return null;
+            int pairs = 0;
+            foreach (Transform child in body.transform) if (child.name == "Juice Eyes") pairs++;
+            Check(again == eyes && pairs == 1, "JuiceEyes.Attach: calling it twice keeps one pair");
+            eyes.autoBlink = false;
+            yield return WaitReal(0.3f);
+            Transform eyesRoot = body.transform.Find("Juice Eyes");
+            Transform eyeL = eyesRoot.Find("Eye L");
+            Vector3 world = eyeL.lossyScale;
+            Check(Mathf.Abs(world.x - world.y) < 0.02f && Mathf.Abs(world.x - 0.3f) < 0.03f,
+                "JuiceEyes: stay round on a stretched body (" + world.x.ToString("0.00") + " x " + world.y.ToString("0.00") + ")");
+            Check(eyeL.GetComponent<SpriteRenderer>().sortingOrder == 8, "JuiceEyes: drawn above the body");
+            Transform pupil = eyeL.Find("Pupil");
+            eyes.LookAt(body.transform.position + Vector3.right * 5f);
+            yield return WaitReal(0.6f);
+            Check(pupil.localPosition.x > 0.1f, "JuiceEyes.LookAt: pupils turn to the target");
+            GameObject lookAt = new GameObject("Eyes Target");
+            lookAt.transform.position = body.transform.position + Vector3.left * 5f;
+            eyes.LookAt(lookAt.transform);
+            yield return WaitReal(0.6f);
+            Check(pupil.localPosition.x < -0.1f, "JuiceEyes.LookAt: follows a transform");
+            float openHeight = eyeL.lossyScale.y;
+            eyes.Squint(0.6f);
+            yield return WaitReal(0.35f);
+            Check(eyeL.lossyScale.y < openHeight * 0.6f, "JuiceEyes.Squint: narrows the eyes");
+            yield return WaitReal(0.9f);
+            eyes.Widen(0.6f);
+            yield return WaitReal(0.35f);
+            Check(eyeL.lossyScale.x > openHeight * 1.15f, "JuiceEyes.Widen: enlarges the eyes");
+            Check(eyesRoot.Find("Mouth").gameObject.activeSelf && !eyesRoot.Find("Smile").gameObject.activeSelf, "JuiceEyes: mouth opens while the eyes are wide");
+            yield return WaitReal(0.9f);
+            Check(eyesRoot.Find("Smile").gameObject.activeSelf, "JuiceEyes: mouth goes back to a smile");
+            eyes.Blink();
+            float lowestLid = 10f;
+            float blinkUntil = Time.realtimeSinceStartup + 0.25f;
+            while (Time.realtimeSinceStartup < blinkUntil)
+            {
+                yield return null;
+                lowestLid = Mathf.Min(lowestLid, eyeL.lossyScale.y);
+            }
+            Check(lowestLid < openHeight * 0.75f, "JuiceEyes.Blink: lids close for a moment");
+            eyes.Visible = false;
+            Check(!eyesRoot.gameObject.activeSelf, "JuiceEyes.Visible: hides the eyes");
+            eyes.Visible = true;
+            Check(eyesRoot.gameObject.activeSelf, "JuiceEyes.Visible: shows them again");
+            Destroy(body);
+            Destroy(lookAt);
+        }
+
+        // ---------------------------------------------------------------- JuiceMusic
+        {
+            AudioClip loop = JuiceMusic.BuiltInLoop;
+            Check(loop != null && Mathf.Abs(loop.length - 16f) < 0.05f, "JuiceMusic: built-in loop is 16 seconds");
+            float[] data = new float[loop.samples];
+            loop.GetData(data, 0);
+            float loudest = 0f;
+            double energy = 0.0;
+            for (int i = 0; i < data.Length; i++)
+            {
+                loudest = Mathf.Max(loudest, Mathf.Abs(data[i]));
+                energy += data[i] * data[i];
+            }
+            float rms = Mathf.Sqrt((float)(energy / data.Length));
+            Check(loudest > 0.5f && loudest <= 1f, "JuiceMusic: loop is audible and does not clip (peak " + loudest.ToString("0.00") + ")");
+            Check(rms > 0.05f, "JuiceMusic: loop is not silent (rms " + rms.ToString("0.000") + ")");
+            Check(Mathf.Abs(data[0] - data[data.Length - 1]) < 0.25f, "JuiceMusic: loop point has no jump");
+
+            JuiceMusic.Play();
+            yield return WaitReal(0.9f);
+            GameObject musicObject = GameObject.Find("[Juice] Music");
+            AudioSource[] tracks = musicObject != null ? musicObject.GetComponents<AudioSource>() : new AudioSource[0];
+            Check(tracks.Length == 2, "JuiceMusic.Play: creates its own two audio tracks");
+            float volume = 0f;
+            bool hasLoop = false;
+            foreach (AudioSource track in tracks)
+            {
+                volume = Mathf.Max(volume, track.volume);
+                if (track.clip == loop) hasLoop = true;
+            }
+            Check(hasLoop && Mathf.Abs(volume - JuiceMusic.Volume) < 0.05f, "JuiceMusic.Play: fades in to JuiceMusic.Volume (" + volume.ToString("0.00") + ")");
+            lines.Add("INFO  JuiceMusic.IsPlaying=" + JuiceMusic.IsPlaying + " BeatPulse=" + JuiceMusic.BeatPulse.ToString("0.00"));
+            JuiceMusic.Duck(0.2f, 0.6f);
+            yield return WaitReal(0.35f);
+            volume = 0f;
+            foreach (AudioSource track in tracks) volume = Mathf.Max(volume, track.volume);
+            Check(volume < JuiceMusic.Volume * 0.5f, "JuiceMusic.Duck: lowers the volume (" + volume.ToString("0.00") + ")");
+            yield return WaitReal(0.8f);
+            volume = 0f;
+            foreach (AudioSource track in tracks) volume = Mathf.Max(volume, track.volume);
+            Check(Mathf.Abs(volume - JuiceMusic.Volume) < 0.05f, "JuiceMusic.Duck: volume comes back");
+            JuiceMusic.Stop(0.3f);
+            yield return WaitReal(0.6f);
+            volume = 0f;
+            foreach (AudioSource track in tracks) volume = Mathf.Max(volume, track.volume);
+            Check(volume <= 0.001f && !JuiceMusic.IsPlaying, "JuiceMusic.Stop: fades out");
+        }
+
+        // ---------------------------------------------------------------- JuiceShowcase
+        {
+            Destroy(demo.gameObject);
+            yield return null;
+            GameObject showObject = new GameObject("Juice Showcase");
+            JuiceShowcase show = showObject.AddComponent<JuiceShowcase>();
+            show.autoPlay = true;
+            yield return null;
+            yield return null;
+            Check(show.BricksAlive == 50, "JuiceShowcase: builds 50 bricks");
+            Check(showObject.transform.Find("Paddle/Stretch/Art/Juice Eyes/Smile") != null, "JuiceShowcase: the paddle has eyes and a mouth");
+            Transform firstBrick = showObject.transform.Find("Brick 0-0");
+            Check(firstBrick != null && firstBrick.position.y > 5f, "JuiceShowcase: bricks start above the screen (spring entrance)");
+            yield return WaitReal(2.2f);
+            Check(Mathf.Abs(firstBrick.position.y - 3.45f) < 0.05f, "JuiceShowcase: bricks land on their rows");
+            Save(Capture(cam, 1280, 720), "showcase_start.png");
+
+            float playUntil = Time.realtimeSinceStartup + 16f;
+            int shots = 0;
+            while (Time.realtimeSinceStartup < playUntil && show.BricksDestroyed < 14)
+            {
+                yield return null;
+                if (shots < 3 && show.BricksDestroyed >= 2 + shots * 4)
+                {
+                    yield return WaitReal(0.07f);
+                    Save(Capture(cam, 1280, 720), "showcase_play" + (shots + 1) + ".png");
+                    shots++;
+                }
+            }
+            Check(show.BricksDestroyed >= 5, "JuiceShowcase: plays by itself and breaks bricks (" + show.BricksDestroyed + ")");
+            Check(show.Score > 0, "JuiceShowcase: score goes up (" + show.Score + ")");
+            int before = show.BallsAlive;
+            show.ExtraBall();
+            yield return null;
+            Check(show.BallsAlive == before + 1 || before >= 4, "JuiceShowcase.ExtraBall: adds a ball (" + before + " -> " + show.BallsAlive + ")");
+
+            show.SetAll(false);
+            yield return WaitReal(1f);
+            Transform paddleEyes = showObject.transform.Find("Paddle/Stretch/Art/Juice Eyes");
+            Check(paddleEyes != null && !paddleEyes.gameObject.activeSelf, "JuiceShowcase: Eyes off hides the eyes");
+            GameObject musicObject = GameObject.Find("[Juice] Music");
+            float volume = 0f;
+            if (musicObject != null) foreach (AudioSource track in musicObject.GetComponents<AudioSource>()) volume = Mathf.Max(volume, track.volume);
+            Check(volume <= 0.001f, "JuiceShowcase: Music off silences the music");
+            int plainBefore = show.BricksDestroyed;
+            yield return WaitReal(3f);
+            Save(Capture(cam, 1280, 720), "showcase_plain.png");
+            lines.Add("INFO  showcase with everything off: " + (show.BricksDestroyed - plainBefore) + " bricks in 3 s");
+            show.SetAll(true);
+            yield return WaitReal(0.5f);
+            Check(paddleEyes.gameObject.activeSelf, "JuiceShowcase: Eyes on brings them back");
+            Destroy(showObject);
+            JuiceTime.Cancel();
+            JuiceMusic.Stop(0f);
+            yield return WaitReal(0.3f);
+            Check(Mathf.Approximately(Time.timeScale, 1f), "time scale is 1 after the showcase");
+        }
+
         // ---------------------------------------------------------------- done
         yield return null;
         Check(errors.Count == 0, "no errors or exceptions were logged (" + errors.Count + ")");
@@ -646,7 +888,7 @@ public class JuiceSelfTest : MonoBehaviour
 
     IEnumerator Watchdog()
     {
-        yield return WaitReal(150f);
+        yield return WaitReal(260f);
         lines.Add("FAIL  timed out");
         Finish(99);
     }

@@ -4,7 +4,7 @@ description: 在 Unity 加上頓幀（hit stop，命中瞬間把時間停住幾�
 license: MIT
 metadata:
   author: yayapipi
-  version: "1.0.1"
+  version: "1.1.0"
 ---
 
 # 頓幀與慢動作

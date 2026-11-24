@@ -1,10 +1,10 @@
 ---
 name: juice-squash-stretch
-description: 在 Unity 加上擠壓與拉伸（squash and stretch）以及縮放彈跳，讓角色與物件有彈性、有生命。用在起跳、落地、衝刺、被打、撿到東西、物件出現的時候。使用者提到擠壓拉伸、Q 彈、彈性、果凍感、角色很僵硬、squash、stretch、punch scale、bounce 時使用。
+description: 在 Unity 加上擠壓與拉伸（squash and stretch）、縮放彈跳，以及彈簧式的移動（被推開再彈回、搖晃、掉進場、有延遲的跟隨），讓角色與物件有彈性、有生命。用在起跳、落地、衝刺、被打、撿到東西、物件出現、物件互相碰撞的時候。使用者提到擠壓拉伸、Q 彈、彈性、果凍感、角色很僵硬、彈簧、搖晃、出場動畫、squash、stretch、punch scale、bounce、spring、wobble 時使用。
 license: MIT
 metadata:
   author: yayapipi
-  version: "1.0.1"
+  version: "1.1.0"
 ---
 
 # 擠壓與拉伸
@@ -59,6 +59,41 @@ JuiceSquash.Punch(transform, -0.1f);    // 按下的感覺：縮小再彈回
 
 落地的幅度可以跟落下速度連動：`JuiceSquash.Squash(visual, Mathf.Clamp(-velocityY * 0.02f, 0.1f, 0.4f));`
 
+## 彈簧：位置與角度也要有彈性
+
+`JuiceSquash` 管大小，`JuiceSpring` 管位置與角度。兩個可以用在同一個物件上。
+
+```csharp
+JuiceSpring.Nudge(transform, Vector3.down * 0.3f);     // 被撞、被踩、後座力：推開再彈回原位
+JuiceSpring.Wobble(transform, 15f);                    // 被打但沒壞：歪一下，晃幾下再回正
+JuiceSpring.DropIn(transform, Vector3.up * 6f, 0.1f);  // 出場：從上方掉進現在的位置，0.1 秒後開始
+JuiceSpring.MoveTo(transform, targetPosition);         // 換位置：衝過頭一點再回來
+JuiceSpring.Follow(transform, target);                 // 一直跟著目標，有延遲與回彈
+```
+
+| 參數 | 起手值 | 說明 |
+|---|---|---|
+| `frequency` | 4 | 每秒來回幾次。3–5 像果凍，8 以上很硬 |
+| `damping` | 0.4 | 0.2 晃很多下，0.5 晃一兩下，1 完全不彈過頭 |
+| `Nudge` 的距離 | 物件大小的 0.2–0.5 倍 | 太大會像瞬間移動 |
+| `Wobble` 的角度 | 10–20 度 | |
+
+調整方式：`JuiceSpring.Nudge(transform, offset).damping = 0.25f;`（每個呼叫都會回傳元件）。
+
+一整排物件出場時，每一個的 `delay` 多 0.03–0.07 秒，看起來就是一波一波落下。
+
+想自己用彈簧控制任何數字（角色跟隨滑鼠的 X、UI 的大小、角度）：
+
+```csharp
+x = JuiceSpring.Step(x, ref xVelocity, targetX, 5f, 0.5f, Time.deltaTime);
+```
+
+規則：
+
+- 用在**不會被其他程式每一格直接指定位置**的物件上。最保險的做法跟擠壓拉伸一樣：用在只放圖的子物件。
+- 會受重力掉落的剛體、CharacterController 所在的物件不要用，改用它的圖片子物件。
+- 靜止之後元件會自己休眠，不會一直佔用效能。
+
 ## 注意
 
 - 用 `localScale.x = -1` 翻面的角色可以直接用，正負號會保留。
@@ -68,4 +103,4 @@ JuiceSquash.Punch(transform, -0.1f);    // 按下的感覺：縮小再彈回
 
 ## 回報
 
-告訴使用者加在哪些事件、幅度各是多少，以及「幅度調大比較卡通、調小比較寫實」。
+告訴使用者加在哪些事件、幅度各是多少，以及「幅度調大比較卡通、調小比較寫實」。用了彈簧的話，說明 `frequency` 與 `damping` 各調什麼。

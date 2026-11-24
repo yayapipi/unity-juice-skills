@@ -2,11 +2,11 @@
 
 線上 Demo：<https://yayapipi.github.io/unity-juice-skills/>
 
-它是 Juice Kit 的示範場景（`JuiceDemo`）打包成 WebGL 的結果，檔案放在這個 Repo 的 `gh-pages` 分支，由 GitHub Pages 提供。
+它是 Juice Kit 的完整展示（`JuiceShowcase`，一個打磚塊小遊戲）打包成 WebGL 的結果，檔案放在這個 Repo 的 `gh-pages` 分支，由 GitHub Pages 提供。
 
 這個資料夾有兩樣東西：
 
-- `Editor/JuiceWebDemoBuilder.cs`：建置腳本。它建立一個只有 `JuiceDemo` 元件的場景，設定 WebGL 選項，然後打包。
+- `Editor/JuiceWebDemoBuilder.cs`：建置腳本。它建立一個只有 `JuiceShowcase` 元件的場景，設定 WebGL 選項，然後打包。
 - `WebGLTemplates/JuiceDemo/index.html`：示範頁的範本，Unity 打包時會把檔名填進去。
 
 ## 自己打包一次

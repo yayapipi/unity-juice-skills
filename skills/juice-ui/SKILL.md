@@ -4,7 +4,7 @@ description: 讓 Unity 的介面與劇情演出有手感：按鈕滑過放大與
 license: MIT
 metadata:
   author: yayapipi
-  version: "1.0.1"
+  version: "1.1.0"
 ---
 
 # 介面與劇情演出

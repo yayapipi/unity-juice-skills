@@ -40,7 +40,7 @@
   <body>
     <main>
       <h1>Juice Kit Demo</h1>
-      <p class="lead">同一個小遊戲，玩法完全不變。用滑鼠點方塊，再把左邊的開關一項一項打開，感受差在哪裡。</p>
+      <p class="lead">一個打磚塊小遊戲，玩法從頭到尾都一樣。把左邊的開關一項一項關掉，看看少了什麼。</p>
 
       <div class="stage">
         <canvas id="unity-canvas" width="{{{ WIDTH }}}" height="{{{ HEIGHT }}}" tabindex="-1"></canvas>
@@ -50,31 +50,35 @@
         </div>
       </div>
       <div class="row">
-        <span>打開 Shake 與 Flash 之後畫面會晃動、閃白。建議用電腦的瀏覽器開啟。</span>
+        <span>畫面會晃動、閃白，音樂在你第一次點擊之後才會開始。建議用電腦的瀏覽器開啟。</span>
         <button id="fullscreen" type="button">全螢幕</button>
       </div>
 
       <h2>怎麼玩</h2>
       <ol>
-        <li>開關全部關閉的時候，先點幾下方塊。打三下方塊會爆炸，過一下會再長出來。</li>
-        <li>從 Sound 開始一項一項打開，每開一項就再點幾下。</li>
-        <li>按 All 全部打開，再點一次，和一開始比較。</li>
+        <li>移動滑鼠控制板子。滑鼠三秒不動，板子會自己玩。點一下多一顆球，最多四顆。</li>
+        <li>按左下角的 None 把所有回饋關掉：同一個遊戲，變得很乾。</li>
+        <li>再從 Spring 開始一項一項打開。也可以按數字鍵 1–9、0、- 切換，空白鍵全開或全關。</li>
       </ol>
 
       <h2>每個開關對應一行程式</h2>
       <div class="scroll">
         <table>
           <tr><th>開關</th><th>效果</th><th>程式</th></tr>
-          <tr><td>Sound</td><td>音效</td><td><code>JuiceSfx.Blip(JuiceBlip.Hit);</code></td></tr>
-          <tr><td>Squash</td><td>擠壓拉伸</td><td><code>JuiceSquash.Punch(transform, 0.25f);</code></td></tr>
-          <tr><td>Flash</td><td>閃白</td><td><code>JuiceFlash.Play(gameObject);</code></td></tr>
-          <tr><td>Particles</td><td>粒子</td><td><code>JuiceBurst.Spark(hitPoint);</code></td></tr>
-          <tr><td>Shake</td><td>鏡頭震動</td><td><code>JuiceShake.Add(0.3f);</code></td></tr>
-          <tr><td>Hit Stop</td><td>頓幀</td><td><code>JuiceTime.HitStop(0.06f);</code></td></tr>
-          <tr><td>Text</td><td>傷害數字</td><td><code>Juice.Damage(hitPoint, 12);</code></td></tr>
+          <tr><td>1 Spring</td><td>彈簧：磚塊掉進場、被震開、板子的延遲與回彈</td><td><code>JuiceSpring.Nudge(transform, direction * 0.3f);</code></td></tr>
+          <tr><td>2 Squash</td><td>擠壓拉伸</td><td><code>JuiceSquash.Squash(transform, 0.3f);</code></td></tr>
+          <tr><td>3 Eyes</td><td>眼睛：看著球、眨眼、嚇到</td><td><code>JuiceEyes.Attach(transform).LookAt(ball);</code></td></tr>
+          <tr><td>4 Trail</td><td>拖尾</td><td><code>JuiceTrail.Attach(gameObject, Color.white);</code></td></tr>
+          <tr><td>5 Particles</td><td>粒子</td><td><code>JuiceBurst.Explosion(position, color);</code></td></tr>
+          <tr><td>6 Flash</td><td>閃白</td><td><code>JuiceFlash.Play(gameObject);</code></td></tr>
+          <tr><td>7 Shake</td><td>鏡頭震動</td><td><code>JuiceShake.Add(0.2f);</code></td></tr>
+          <tr><td>8 Hit Stop</td><td>頓幀與過關的慢動作</td><td><code>JuiceTime.HitStop(0.03f);</code></td></tr>
+          <tr><td>9 Text</td><td>飄字</td><td><code>JuiceFloatingText.Spawn(position, "+10");</code></td></tr>
+          <tr><td>0 Sound</td><td>音效，連續打掉越多塊音越高</td><td><code>JuiceSfx.Blip(JuiceBlip.Coin);</code></td></tr>
+          <tr><td>- Music</td><td>背景音樂</td><td><code>JuiceMusic.Play();</code></td></tr>
         </table>
       </div>
-      <p style="margin-top: 12px">全部打開，等於這一行：<code>Juice.Hit(enemy.gameObject, hitPoint);</code></p>
+      <p style="margin-top: 12px">磚塊的碎片與衝擊波是這個展示自己寫的，大約四十行，在 <code>JuiceShowcase.cs</code> 裡可以直接抄。其他都是 Juice Kit 的一行呼叫。</p>
 
       <h2>用在你的 Unity 專案</h2>
       <p class="lead">在 Unity 專案的資料夾裡開啟 Codex、Claude Code 或 Cursor，貼上這段：</p>

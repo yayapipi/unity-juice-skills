@@ -21,7 +21,7 @@ using UnityEngine;
 /// </summary>
 public static class Juice
 {
-    public const string Version = "1.0.1";
+    public const string Version = "1.1.0";
 
     /// <summary>命中。power 1 = 一般攻擊，0.5 = 輕擊，2 = 重擊。</summary>
     public static void Hit(GameObject target, Vector3 point, float power = 1f)

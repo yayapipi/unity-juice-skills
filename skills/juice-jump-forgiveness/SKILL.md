@@ -4,7 +4,7 @@ description: 讓 Unity 平台跳躍角色的操作更順、更寬容：土狼時
 license: MIT
 metadata:
   author: yayapipi
-  version: "1.0.1"
+  version: "1.1.0"
 ---
 
 # 跳躍的隱形幫手
