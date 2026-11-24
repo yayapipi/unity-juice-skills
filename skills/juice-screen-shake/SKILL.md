@@ -4,7 +4,7 @@ description: 在 Unity 加上鏡頭震動（創傷值 trauma 模型）、開槍�
 license: MIT
 metadata:
   author: yayapipi
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # 鏡頭震動
@@ -36,8 +36,8 @@ JuiceShake.Zoom(0.05f, 0.25f);            // 推近 5%，0.25 秒內彈回
    |---|---|
    | 輕擊、重落地 | 0.15–0.25 |
    | 一般命中 | 0.3–0.4 |
-   | 玩家受傷、擊殺 | 0.45–0.6 |
-   | 爆炸、Boss 倒下 | 0.7–1 |
+   | 玩家受傷、擊殺、一般爆炸 | 0.45–0.6 |
+   | 大爆炸、Boss 倒下 | 0.7–1 |
 
 3. 射擊遊戲再加後座：`JuiceShake.Kick(-aimDirection, 0.2f);`（往射擊的反方向）。
 4. 重擊、過關再加推近：`JuiceShake.Zoom(0.04f);`
@@ -58,7 +58,7 @@ JuiceShake.Zoom(0.05f, 0.25f);            // 推近 5%，0.25 秒內彈回
 
 ## 為什麼不會跟別的鏡頭程式打架
 
-位移只在「畫這一格」的時候套用，畫完立刻還原，鏡頭的 Transform 實際上沒有被改。所以可以直接跟鏡頭跟隨腳本、`JuiceFollowCamera`、Cinemachine 一起用，不用把鏡頭包進父物件。內建管線、URP、HDRP 都支援。
+位移只在「畫這一格」的時候套用，畫完立刻還原，鏡頭的 Transform 實際上沒有被改。所以可以直接跟鏡頭跟隨腳本、`JuiceFollowCamera`、Cinemachine 一起用，不用把鏡頭包進父物件。內建管線與 URP 都實際測過；HDRP 用的是同一組事件，但沒有實際測過。
 
 用的是 unscaled time，頓幀（`Time.timeScale = 0`）的時候照樣會震，兩個可以一起用。
 

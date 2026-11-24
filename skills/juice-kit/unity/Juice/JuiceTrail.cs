@@ -12,7 +12,7 @@ public static class JuiceTrail
 
     public static TrailRenderer Attach(GameObject target, Color color, float width = 0.3f, float time = 0.25f)
     {
-        if (target == null) return null;
+        if (target == null || !Application.isPlaying) return null;
         Transform child = target.transform.Find(ChildName);
         if (child == null)
         {

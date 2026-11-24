@@ -10,8 +10,8 @@ using UnityEngine;
 [AddComponentMenu("Juice/Juice Counter")]
 public class JuiceCounter : MonoBehaviour
 {
-    [Tooltip("數字的格式。{0:N0} 會加千分位（1,234），{0} 不加，也可以寫「分數：{0}」。")]
-    public string format = "{0:N0}";
+    [Tooltip("數字的格式。{0} 是原樣（1234），{0:N0} 會加千分位（1,234），也可以寫「分數：{0}」。")]
+    public string format = "{0}";
 
     [Tooltip("滾到目標數字要幾秒。")]
     public float duration = 0.4f;

@@ -4,7 +4,7 @@ description: 在 Unity 加上受擊閃白：角色或敵人被打到的瞬間整
 license: MIT
 metadata:
   author: yayapipi
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # 受擊閃白

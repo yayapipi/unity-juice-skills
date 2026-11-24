@@ -38,12 +38,23 @@ public class JuiceJumpAssist
 
     float lastGroundedTime = -999f;
     float lastPressTime = -999f;
+    float lastJumpTime = -999f;
+    bool leavingGround;
     bool cutUsed;
 
     /// <summary>每一格（或每個 FixedUpdate）都要呼叫，告訴它現在有沒有踩在地上。</summary>
     public void Tick(bool grounded)
     {
-        if (grounded) lastGroundedTime = Time.time;
+        if (!grounded)
+        {
+            leavingGround = false;
+            return;
+        }
+        // 剛起跳的那幾格，地面偵測通常還碰得到地。這時候不能算成「又踩到地」，否則可以在空中再跳一次。
+        // 0.2 秒後還在地上，代表這次起跳沒有成功離地（例如頭頂被擋住），恢復正常。
+        if (leavingGround && Time.time - lastJumpTime < 0.2f) return;
+        leavingGround = false;
+        lastGroundedTime = Time.time;
     }
 
     /// <summary>玩家按下跳躍鍵的那一格呼叫。</summary>
@@ -63,6 +74,8 @@ public class JuiceJumpAssist
         if (now - lastGroundedTime > coyoteTime) return false;
         lastPressTime = -999f;
         lastGroundedTime = -999f;
+        lastJumpTime = now;
+        leavingGround = true;
         cutUsed = false;
         return true;
     }

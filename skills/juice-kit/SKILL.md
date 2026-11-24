@@ -4,7 +4,7 @@ description: 把 Juice Kit（一組不需要素材、不需要付費插件的 Un
 license: MIT
 metadata:
   author: yayapipi
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # Juice Kit：安裝與總覽
@@ -14,12 +14,13 @@ Juice Kit 是 24 個 C# 腳本加兩個 Shader（每個檔案旁邊有一個 Uni
 ## 安裝步驟
 
 1. **找到 Unity 專案根目錄**：同時有 `Assets/` 與 `ProjectSettings/` 的那個資料夾。
-2. **檢查是否已安裝**：如果 `Assets/Juice/Juice.cs` 已經存在，讀裡面的 `Version`。跟這份 Skill 的版本（1.0.0）相同就不用重裝，直接結束。
-3. **複製資料夾**：把這個 Skill 資料夾裡的 `unity/Juice/` 整個複製成專案的 `Assets/Juice/`，子資料夾 `UI`、`Resources`、`Demo`、`Editor` 與所有 `.meta` 檔都要保留。更新舊版時直接覆蓋同名檔案。
-   - macOS、Linux：`cp -R "<這個 Skill 的路徑>/unity/Juice" "<專案>/Assets/Juice"`
-   - Windows PowerShell：`Copy-Item -Recurse "<這個 Skill 的路徑>\unity\Juice" "<專案>\Assets\Juice"`
+2. **檢查是否已安裝**：如果 `Assets/Juice/Juice.cs` 已經存在，讀裡面的 `Version`。跟這份 Skill 的版本（1.0.1）相同就不用重裝，直接結束。
+3. **複製內容**：把這個 Skill 資料夾裡 `unity/Juice/` **裡面的內容**複製到專案的 `Assets/Juice/`，子資料夾 `UI`、`Resources`、`Demo`、`Editor` 與所有 `.meta` 檔都要保留。第一次安裝與更新舊版都用同一組指令，同名檔案會被覆蓋：
+   - macOS、Linux：`mkdir -p "<專案>/Assets/Juice" && cp -R "<這個 Skill 的路徑>/unity/Juice/." "<專案>/Assets/Juice/"`
+   - Windows PowerShell：`New-Item -ItemType Directory -Force "<專案>\Assets\Juice" | Out-Null; Copy-Item -Recurse -Force "<這個 Skill 的路徑>\unity\Juice\*" "<專案>\Assets\Juice\"`
+   - 來源結尾的 `/.` 與 `\*` 不能少：少了它，在 `Assets/Juice` 已經存在時會複製成 `Assets/Juice/Juice`，腳本重複、整個專案編譯失敗。複製完確認沒有 `Assets/Juice/Juice/` 這個資料夾。
    - 如果這個 Skill 資料夾裡沒有 `unity/Juice`，從 GitHub 取得：`git clone --depth 1 https://github.com/yayapipi/unity-juice-skills`，來源是 `skills/juice-kit/unity/Juice`。
-4. **檢查 uGUI**：`Packages/manifest.json` 沒有 `com.unity.ugui` 的話，刪掉 `Assets/Juice/UI/`（裡面兩個檔案需要 Unity UI）。
+4. **檢查 uGUI**：`Packages/manifest.json` 沒有 `com.unity.ugui` 的話，刪掉 `Assets/Juice/UI/` 與 `Assets/Juice/UI.meta`（裡面兩個檔案需要 Unity UI）。
 5. **等 Unity 編譯**，確認 Console 沒有錯誤。你有工具可以讀 Console（Unity CLI、Unity MCP）就自己讀；沒有就請使用者切回 Unity 看一眼。
 6. **回報**：告訴使用者裝在哪裡，以及可以用選單 `Tools ▸ Juice ▸ Create Demo Scene` 看示範。
 
@@ -33,7 +34,7 @@ Juice Kit 預設編進 `Assembly-CSharp`，放在 asmdef 裡的腳本引用不�
 
 | 類別 | 一句話 | 最常用的一行 |
 |---|---|---|
-| `Juice` | 常見事件的一行配方 | `Juice.Hit(enemy, hitPoint);` |
+| `Juice` | 常見事件的一行配方 | `Juice.Hit(enemy.gameObject, hitPoint);` |
 | `JuiceShake` | 鏡頭震動、後座、推近 | `JuiceShake.Add(0.4f);` |
 | `JuiceTime` | 頓幀、慢動作 | `JuiceTime.HitStop(0.06f);` |
 | `JuiceSquash` | 擠壓、拉伸、彈一下 | `JuiceSquash.Squash(transform);` |
@@ -53,7 +54,31 @@ Juice Kit 預設編進 `Assembly-CSharp`，放在 asmdef 裡的腳本引用不�
 | `JuiceSettings` | 讓玩家關掉震動與閃光 | `JuiceSettings.ScreenShake = false;` |
 | `JuiceEase`、`JuiceRunner` | 緩動曲線與最小的補間 | `JuiceRunner.Tween(0.3f, e => ...);` |
 
-所有 `static` 的呼叫都會自己建立需要的物件（鏡頭上的元件、粒子系統、AudioSource），**不用在場景裡先放任何東西**。在編輯模式（沒按 Play）呼叫不會有任何作用，也不會出錯。
+所有 `static` 的回饋呼叫都會自己建立需要的物件（鏡頭上的元件、粒子系統、AudioSource），**不用在場景裡先放任何東西**。在編輯模式（沒按 Play）呼叫不會有任何作用，也不會出錯。
+
+## 一行配方裡面是什麼
+
+| 配方 | 等於這幾行 |
+|---|---|
+| `Juice.Hit(target, point, power)` | `JuiceTime.HitStop(0.06f * power)`、`JuiceShake.Add(0.3f * power)`、`JuiceFlash.Play(target)`、`JuiceSquash.Punch(target.transform, 0.15f * power)`、`JuiceBurst.Spark(point)`、`JuiceSfx.Blip(JuiceBlip.Hit)` |
+| `Juice.Hurt(target, power)` | `HitStop(0.1f * power)`、`Add(0.5f * power)`、`JuiceFlash.Play(target, 紅色, 0.1f)`、`JuiceSquash.Squash(target.transform, 0.2f * power)`、`Blip(Hurt)` |
+| `Juice.Jump(transform)` | `JuiceSquash.Stretch(transform, 0.22f)`、`JuiceBurst.Dust(腳底)`、`Blip(Jump, 0.4f)` |
+| `Juice.Land(transform, impact)` | `JuiceSquash.Squash(transform, 0.25f * impact)`、`JuiceBurst.Dust(腳底)`、`Blip(Land, 0.4f)`；`impact` 1.5 以上再加 `Add(0.12f * impact)` |
+| `Juice.Pickup(position, color, text)` | `JuiceBurst.Spawn(position, color, 8, 4f, 0.14f, 0.35f)`、`Blip(Pickup)`；有 `text` 再加 `JuiceFloatingText.Spawn` |
+| `Juice.Coin(position, combo)` | `JuiceBurst.Spawn(position, 金色, 6, 3.5f, 0.12f, 0.3f)`、`JuiceSfx.PlayCombo(金幣音, combo, 0.45f)` |
+| `Juice.Explode(position, power)` | `HitStop(0.12f * power)`、`Add(0.6f * power)`、`JuiceShake.Zoom(0.04f * power, 0.3f)`、`JuiceBurst.Explosion(position, null, power)`、`Blip(Explosion, 0.6f)` |
+| `Juice.Win(position)` | `JuiceBurst.Confetti(position)`、`Blip(PowerUp)`、`JuiceTime.SlowMo(0.4f, 0.4f)`、`JuiceShake.Zoom(0.06f, 0.5f)` |
+| `Juice.Lose()` | `Blip(Lose)`、`JuiceTime.SlowMo(0.3f, 0.6f)`、`JuiceShake.Add(0.5f)` |
+
+使用者要其中一項不一樣（例如更短的頓幀、不要震動），就把配方那一行換成表裡的幾行，再改數字或拿掉其中一行。
+
+## 兩件一定要知道的事
+
+1. **變形只會作用在安全的物件上**。`JuiceSquash.Squash`、`Stretch`、`Punch`（以及用到它們的 `Juice.Jump`、`Land`、`Hit`、`Hurt`）會自己挑物件：
+   - 角色的圖放在子物件上：只變形那個子物件，碰撞框不受影響。
+   - 圖和「會受重力掉落的剛體」（Dynamic 的 Rigidbody 或 CharacterController）在同一個物件上：**不變形**，Console 會提示一次，其他回饋照常。因為這種物件一縮放，碰撞框與地面偵測點會跟著移動，角色會浮起來或重複觸發落地。
+   - 遇到第二種情況：你能操作編輯器時，把圖（Sprite 或模型）移到子物件；不能的話，在回報裡告訴使用者這樣做就會有擠壓拉伸。
+2. **`Juice.Hit`、`Hurt`、`Explode`、`Win`、`Lose` 會動到 `Time.timeScale`**（頓幀或慢動作）。專案有暫停選單時，在進入暫停之前加上 `JuiceTime.Cancel();`，細節見 `juice-hit-stop`。
 
 ## 示範場景
 

@@ -4,7 +4,7 @@ description: 在 Unity 加上擠壓與拉伸（squash and stretch）以及縮放
 license: MIT
 metadata:
   author: yayapipi
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # 擠壓與拉伸
@@ -30,9 +30,13 @@ JuiceSquash.Punch(transform, -0.1f);    // 按下的感覺：縮小再彈回
 
 ## 步驟
 
-1. 找到事件的那一行（起跳、落地、受擊…）。落地通常是「上一格不在地上、這一格在地上」的地方；專案沒有這個判斷就加一個 `bool wasGrounded`。
-2. **決定要變形哪個物件**。物件上有碰撞框（Collider）或剛體時，縮放會連碰撞框一起變形，角色可能卡進地板。這時候把圖（SpriteRenderer 或模型）放在子物件上，對子物件變形：`JuiceSquash.Squash(visual, 0.25f);`。專案原本就把圖放在子物件就直接用；沒有的話，幅度不超過 0.2 通常沒問題，並在回報裡提醒使用者。
-3. 加上呼叫，確認能編譯。
+1. 找到事件的那一行（起跳、落地、受擊…）。落地通常是「上一格不在地上、這一格在地上」的地方；專案沒有這個判斷就記下上一格的值，並把初始值設成 true，開場第一格才不會誤播。
+2. **看角色的結構**。縮放會連同一個物件上的碰撞框、以及底下的地面偵測點一起移動，所以 Kit 會自己挑安全的物件：
+   - 傳進去的物件沒有碰撞框與剛體：直接變形它。
+   - 有物理，而圖（SpriteRenderer 或模型）放在子物件：只變形放圖的子物件。這是最理想的結構，直接傳角色的 `transform` 就好。
+   - 圖和會受重力掉落的剛體（Dynamic 的 Rigidbody、CharacterController）在同一個物件上：**不會變形**，Console 會提示一次。這時候要把圖移到子物件：你能操作編輯器（Unity CLI、Unity MCP）就自己做，注意 Animator 與腳本裡對 SpriteRenderer 的引用要跟著改；不能的話，在回報裡清楚告訴使用者。不要為了有變形而去縮放帶碰撞框的物件。
+   - 自己寫的 Kinematic 角色控制器 Kit 判斷不出來，一樣請把圖放在子物件。
+3. 加上呼叫，確認能編譯。想強制指定變形的物件，就在角色上自己掛 `JuiceSquash` 元件並設定 `target`，或呼叫 `JuiceSquash.Get(visual).Squash(0.25f);`。
 4. 想調回彈的感覺時，設定元件的欄位：
 
    ```csharp

@@ -149,6 +149,51 @@ public class JuiceSelfTest : MonoBehaviour
             "JuiceSquash: re-trigger mid-animation still returns to the original scale");
         Destroy(box);
 
+        // 圖和會掉落的剛體在同一個物件上：不能變形（碰撞框會跟著動）
+        GameObject faller = new GameObject("Faller");
+        faller.AddComponent<SpriteRenderer>().sprite = JuiceAssets.SquareSprite;
+        faller.AddComponent<Rigidbody2D>().constraints = RigidbodyConstraints2D.FreezeAll;
+        faller.AddComponent<BoxCollider2D>();
+        faller.transform.position = new Vector3(-7f, 3.5f, 0f);
+        JuiceSquash.Squash(faller.transform, 0.25f);
+        Juice.Land(faller.transform);
+        Juice.Jump(faller.transform);
+        Check(faller.transform.localScale == Vector3.one && faller.GetComponent<JuiceSquash>() == null &&
+              JuiceSquash.SafeTarget(faller.transform) == null,
+            "JuiceSquash: never deforms an object whose art shares a falling rigidbody");
+
+        // 圖在子物件上：只變形子物件
+        GameObject hero = new GameObject("Hero");
+        hero.AddComponent<Rigidbody2D>().constraints = RigidbodyConstraints2D.FreezeAll;
+        hero.AddComponent<CapsuleCollider2D>();
+        hero.transform.position = new Vector3(-7f, 2f, 0f);
+        GameObject art = new GameObject("Art");
+        art.transform.SetParent(hero.transform, false);
+        art.AddComponent<SpriteRenderer>().sprite = JuiceAssets.SquareSprite;
+        GameObject groundCheck = new GameObject("GroundCheck");
+        groundCheck.transform.SetParent(hero.transform, false);
+        groundCheck.transform.localPosition = new Vector3(0f, -0.5f, 0f);
+        Vector3 checkBefore = groundCheck.transform.position;
+        Juice.Land(hero.transform);
+        Check(hero.transform.localScale == Vector3.one && Mathf.Abs(art.transform.localScale.x - 1.25f) < 0.01f &&
+              groundCheck.transform.position == checkBefore,
+            "JuiceSquash: squashes the art child and leaves the physics root and ground check alone: " + art.transform.localScale);
+        yield return WaitReal(0.4f);
+        Check(Vector3.Distance(art.transform.localScale, Vector3.one) < 0.0001f, "JuiceSquash: art child returns to scale 1");
+
+        // 不會掉落的物件（Kinematic）：可以直接變形
+        GameObject floater = new GameObject("Floater");
+        floater.AddComponent<SpriteRenderer>().sprite = JuiceAssets.SquareSprite;
+        floater.AddComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Kinematic;
+        floater.AddComponent<BoxCollider2D>().isTrigger = true;
+        floater.transform.position = new Vector3(-7f, 0.5f, 0f);
+        JuiceSquash.Punch(floater.transform, 0.2f);
+        Check(Mathf.Abs(floater.transform.localScale.x - 1.2f) < 0.01f, "JuiceSquash: kinematic objects are deformed directly");
+        yield return WaitReal(0.4f);
+        Destroy(faller);
+        Destroy(hero);
+        Destroy(floater);
+
         // ---------------------------------------------------------------- time
         Check(Mathf.Approximately(Time.timeScale, 1f), "time scale is 1 before the tests");
         float fixedBefore = Time.fixedDeltaTime;
@@ -360,6 +405,9 @@ public class JuiceSelfTest : MonoBehaviour
         Check(found != null && !found.SupportsVisibleCount, "JuiceText.Find: finds UI Text");
         JuiceCounter counter = textObject.AddComponent<JuiceCounter>();
         counter.duration = 0.2f;
+        counter.SetInstant(1234);
+        Check(uiText.text == "1234", "JuiceCounter: the default format shows the number as it was: " + uiText.text);
+        counter.format = "{0:N0}";
         counter.SetInstant(0);
         counter.Set(1234);
         yield return WaitReal(0.1f);
@@ -458,6 +506,21 @@ public class JuiceSelfTest : MonoBehaviour
         Check(!jump.TryJump(), "JuiceJumpAssist: buffer expires");
         Check(Mathf.Approximately(jump.GravityMultiplier(0.5f, true), 0.5f) && Mathf.Approximately(jump.GravityMultiplier(-5f, false), 1.5f) &&
               Mathf.Approximately(jump.GravityMultiplier(8f, true), 1f), "JuiceJumpAssist: gravity multipliers");
+
+        JuiceJumpAssist hop = new JuiceJumpAssist();
+        hop.Tick(true);
+        hop.Press();
+        Check(hop.TryJump(), "JuiceJumpAssist: jumps from the ground");
+        hop.Tick(true); // 起跳後的下一格，地面偵測還碰得到地
+        hop.Press();
+        Check(!hop.TryJump(), "JuiceJumpAssist: no second jump while the ground check still overlaps after take-off");
+        hop.Tick(false);
+        hop.Tick(true);
+        Check(hop.TryJump(), "JuiceJumpAssist: the buffered press jumps once the character has really left and landed");
+        yield return new WaitForSeconds(0.25f);
+        hop.Tick(true); // 起跳後一直沒有離地（頭頂被擋住）
+        hop.Press();
+        Check(hop.TryJump(), "JuiceJumpAssist: re-arms when the character never left the ground");
 
         // ---------------------------------------------------------------- follow camera
         GameObject followTarget = new GameObject("Follow Target");

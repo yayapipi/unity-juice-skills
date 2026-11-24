@@ -4,7 +4,7 @@ description: 讓 Unity 的介面與劇情演出有手感：按鈕滑過放大與
 license: MIT
 metadata:
   author: yayapipi
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # 介面與劇情演出
@@ -44,7 +44,19 @@ counter.Add(10);           // 加 10
 counter.SetInstant(0);     // 直接設定，不播動畫（開場、讀檔時用）
 ```
 
-欄位：`format`（預設 `{0:N0}` 有千分位；可以寫 `分數：{0}`）、`duration`（0.4 秒）、`punch`（彈多大，0 = 不彈）。
+欄位：`format`（預設 `{0}` 跟原本的顯示一樣；`{0:N0}` 會加千分位；也可以寫 `分數：{0}`）、`duration`（0.4 秒）、`punch`（彈多大，0 = 不彈）。
+
+不能操作編輯器時，在用到它的腳本裡自動掛上，使用者之後自己在 Inspector 掛了也不會重複：
+
+```csharp
+JuiceCounter counter;
+
+void Awake()
+{
+    counter = scoreText.GetComponent<JuiceCounter>();
+    if (counter == null) counter = scoreText.gameObject.AddComponent<JuiceCounter>();
+}
+```
 
 ## 傷害數字與飄字：JuiceFloatingText
 

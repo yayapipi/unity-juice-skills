@@ -8,19 +8,15 @@ Unity 專案的根目錄是同時有 `Assets/` 與 `ProjectSettings/` 的資料�
 
 ## 2. 取得這個 Repo
 
-如果你正在讀的就是本機的這份檔案，跳過這一步。
+使用者的指令通常已經讓你執行過 `git clone`，那這一步就完成了。記下 clone 出來的資料夾在哪裡（通常是目前資料夾底下的 `unity-juice-skills`），下面稱它為 `<Repo>`，第 6 步要刪掉它。
 
-把 Repo 放在**專案外面**的暫存位置（不要放進 `Assets/`，否則 Unity 會把說明檔與測試一起匯入）：
-
-```bash
-git clone --depth 1 https://github.com/yayapipi/unity-juice-skills
-```
-
-沒有 git 的話，下載 `https://github.com/yayapipi/unity-juice-skills/archive/refs/heads/main.zip` 再解壓縮。
+- clone 在 Unity 專案資料夾裡面沒有關係，只要不是在 `Assets/` 底下。如果在 `Assets/` 底下，先把它移出來，否則 Unity 會把說明檔與測試一起匯入。
+- 還沒 clone：`git clone --depth 1 https://github.com/yayapipi/unity-juice-skills`
+- 沒有 git：下載 `https://github.com/yayapipi/unity-juice-skills/archive/refs/heads/main.zip` 再解壓縮。
 
 ## 3. 把 Skills 複製到你會讀取的資料夾
 
-把 Repo 裡 `skills/` 底下的 12 個資料夾，整個複製到專案根目錄下、你這個 Agent 讀取 Skills 的位置。子資料夾（尤其是 `juice-kit/unity/`）要一起複製。
+把 `<Repo>/skills/` 底下的 12 個資料夾，複製到專案根目錄下、你這個 Agent 讀取 Skills 的位置。子資料夾（尤其是 `juice-kit/unity/`）要一起複製。
 
 | Agent | 位置 |
 |---|---|
@@ -30,7 +26,19 @@ git clone --depth 1 https://github.com/yayapipi/unity-juice-skills
 | Trae | `.trae/skills/` |
 | 其他，或你不確定 | `.agents/skills/` |
 
-完成後應該長這樣（以 `.agents/skills/` 為例）：
+以 `.agents/skills/` 為例（第一次安裝與之後更新都用同一組指令，同名檔案會被覆蓋）：
+
+```bash
+mkdir -p "<專案>/.agents/skills"
+cp -R "<Repo>/skills/." "<專案>/.agents/skills/"
+```
+
+```powershell
+New-Item -ItemType Directory -Force "<專案>\.agents\skills" | Out-Null
+Copy-Item -Recurse -Force "<Repo>\skills\*" "<專案>\.agents\skills\"
+```
+
+完成後應該長這樣：
 
 ```text
 <Unity 專案>/
@@ -43,20 +51,32 @@ git clone --depth 1 https://github.com/yayapipi/unity-juice-skills
 └── ProjectSettings/
 ```
 
-專案裡已經有同名的資料夾（之前裝過）就整個覆蓋。
-
 ## 4. 安裝 Juice Kit
 
-照 `skills/juice-kit/SKILL.md` 的步驟做。重點：把 `skills/juice-kit/unity/Juice/` 整個複製成 `<Unity 專案>/Assets/Juice/`，`.meta` 檔也要一起複製。
+把 `<Repo>/skills/juice-kit/unity/Juice/` **裡面的內容**複製到 `<專案>/Assets/Juice/`，`.meta` 檔也要一起複製：
+
+```bash
+mkdir -p "<專案>/Assets/Juice"
+cp -R "<Repo>/skills/juice-kit/unity/Juice/." "<專案>/Assets/Juice/"
+```
+
+```powershell
+New-Item -ItemType Directory -Force "<專案>\Assets\Juice" | Out-Null
+Copy-Item -Recurse -Force "<Repo>\skills\juice-kit\unity\Juice\*" "<專案>\Assets\Juice\"
+```
+
+注意來源結尾的 `/.` 與 `\*`：少了它，在 `Assets/Juice` 已經存在時會複製成 `Assets/Juice/Juice`，腳本重複、整個專案編譯失敗。
+
+專案沒有 Unity UI（`Packages/manifest.json` 裡沒有 `com.unity.ugui`）時，刪掉 `Assets/Juice/UI/` 與 `Assets/Juice/UI.meta`。其餘細節見 `skills/juice-kit/SKILL.md`。
 
 ## 5. 確認
 
+- `Assets/Juice/Juice.cs` 存在，而且**沒有** `Assets/Juice/Juice/` 這個多出來的資料夾。
 - Unity 重新編譯之後 Console 沒有錯誤。你有工具可以讀 Console（Unity CLI、Unity MCP）就自己確認；沒有就請使用者切回 Unity 看。
-- `Assets/Juice/Juice.cs` 存在。
 
 ## 6. 收尾
 
-刪掉第 2 步的暫存資料夾，然後告訴使用者：
+刪掉 clone 下來的 `<Repo>` 資料夾（第 2 步記下的位置，不管它在專案裡面還是外面），然後告訴使用者：
 
 - 裝了 12 個 Skill 與 Juice Kit，各放在哪裡。
 - 有些 Agent 要重新開啟對話或重新啟動才會讀到新的 Skill。

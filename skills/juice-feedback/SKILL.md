@@ -4,7 +4,7 @@ description: 用 JuiceFeedback 元件把一個事件的所有回饋（頓幀、�
 license: MIT
 metadata:
   author: yayapipi
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # Juice Feedback：一個事件，一個元件

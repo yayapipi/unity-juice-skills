@@ -4,7 +4,7 @@ description: 在 Unity 用一行程式噴出粒子與加上拖尾：命中火花
 license: MIT
 metadata:
   author: yayapipi
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # 粒子與拖尾

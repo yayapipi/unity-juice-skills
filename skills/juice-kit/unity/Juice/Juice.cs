@@ -15,16 +15,19 @@ using UnityEngine;
 ///
 /// 想調整其中一項，就改用下面各個類別（JuiceShake、JuiceTime、JuiceFlash…），
 /// 或是用 JuiceFeedback 元件在 Inspector 裡調。
+///
+/// Hit、Hurt、Explode、Win、Lose 會動到 Time.timeScale（頓幀或慢動作）。
+/// 專案有暫停選單時，請在暫停前呼叫 JuiceTime.Cancel()。
 /// </summary>
 public static class Juice
 {
-    public const string Version = "1.0.0";
+    public const string Version = "1.0.1";
 
     /// <summary>命中。power 1 = 一般攻擊，0.5 = 輕擊，2 = 重擊。</summary>
     public static void Hit(GameObject target, Vector3 point, float power = 1f)
     {
-        JuiceTime.HitStop(0.05f * power);
-        JuiceShake.Add(0.25f * power);
+        JuiceTime.HitStop(0.06f * power);
+        JuiceShake.Add(0.3f * power);
         if (target != null)
         {
             JuiceFlash.Play(target);
@@ -44,8 +47,8 @@ public static class Juice
     /// <summary>玩家受傷：比命中更重，閃紅色。</summary>
     public static void Hurt(GameObject target, float power = 1f)
     {
-        JuiceTime.HitStop(0.08f * power);
-        JuiceShake.Add(0.45f * power);
+        JuiceTime.HitStop(0.1f * power);
+        JuiceShake.Add(0.5f * power);
         if (target != null)
         {
             JuiceFlash.Play(target, new Color(1f, 0.25f, 0.25f), 0.1f);
@@ -93,7 +96,7 @@ public static class Juice
     /// <summary>爆炸或死亡：整個畫面都要有感覺。</summary>
     public static void Explode(Vector3 position, float power = 1f)
     {
-        JuiceTime.HitStop(0.1f * power);
+        JuiceTime.HitStop(0.12f * power);
         JuiceShake.Add(0.6f * power);
         JuiceShake.Zoom(0.04f * power, 0.3f);
         JuiceBurst.Explosion(position, null, power);

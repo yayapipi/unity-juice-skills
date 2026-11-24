@@ -4,7 +4,7 @@ description: 在 Unity 加上音效回饋：每次播放音高隨機（連打不
 license: MIT
 metadata:
   author: yayapipi
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # 音效

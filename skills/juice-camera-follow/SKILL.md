@@ -4,7 +4,7 @@ description: 讓 Unity 的鏡頭跟得自然：阻尼跟隨（慢半拍跟上）
 license: MIT
 metadata:
   author: yayapipi
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # 鏡頭跟隨
