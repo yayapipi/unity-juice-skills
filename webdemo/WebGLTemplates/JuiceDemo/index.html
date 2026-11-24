@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Juice Kit Demo｜Unity Juice Skills</title>
+    <meta name="description" content="Unity Juice Skills 的線上示範：同一個小遊戲，一項一項打開音效、擠壓拉伸、閃白、粒子、鏡頭震動、頓幀與傷害數字。">
+    <style>
+      :root { --bg: #131129; --stage: #1a1738; --panel: #1e1b3d; --line: #37326a; --ink: #f4f2ff; --dim: #aaa5d8; --accent: #ffbd4d; }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; background: var(--bg); color: var(--ink); }
+      body { font-family: system-ui, -apple-system, "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif; line-height: 1.65; }
+      main { max-width: 1040px; margin: 0 auto; padding: 22px 16px 48px; }
+      h1 { font-size: 24px; margin: 0 0 4px; }
+      h2 { font-size: 17px; margin: 30px 0 10px; }
+      p { margin: 0 0 12px; }
+      a { color: var(--accent); }
+      code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.92em; }
+      .lead { color: var(--dim); }
+      .stage { position: relative; width: 100%; aspect-ratio: 16 / 9; background: var(--stage); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+      .stage canvas { display: block; width: 100%; height: 100%; outline: none; }
+      .loading { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; color: var(--dim); font-size: 14px; text-align: center; padding: 16px; }
+      .bar { width: 240px; max-width: 70%; height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; }
+      .bar div { width: 0; height: 100%; background: var(--accent); transition: width 0.15s; }
+      .row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin: 10px 0 0; color: var(--dim); font-size: 14px; }
+      button { font: inherit; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 6px 14px; cursor: pointer; }
+      button:hover { border-color: var(--accent); }
+      ol { margin: 0; padding-left: 1.3em; }
+      .scroll { overflow-x: auto; }
+      table { width: 100%; border-collapse: collapse; font-size: 15px; }
+      th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+      th { color: var(--dim); font-weight: 600; }
+      td:last-child { white-space: normal; color: var(--dim); }
+      .box { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+      .box pre { margin: 0; white-space: pre-wrap; word-break: break-word; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 14px; }
+      .box .row { margin-top: 10px; }
+      footer { margin-top: 34px; color: var(--dim); font-size: 14px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Juice Kit Demo</h1>
+      <p class="lead">同一個小遊戲，玩法完全不變。用滑鼠點方塊，再把左邊的開關一項一項打開，感受差在哪裡。</p>
+
+      <div class="stage">
+        <canvas id="unity-canvas" width="{{{ WIDTH }}}" height="{{{ HEIGHT }}}" tabindex="-1"></canvas>
+        <div class="loading" id="loading">
+          <div id="loading-text">載入中…</div>
+          <div class="bar"><div id="loading-bar"></div></div>
+        </div>
+      </div>
+      <div class="row">
+        <span>打開 Shake 與 Flash 之後畫面會晃動、閃白。建議用電腦的瀏覽器開啟。</span>
+        <button id="fullscreen" type="button">全螢幕</button>
+      </div>
+
+      <h2>怎麼玩</h2>
+      <ol>
+        <li>開關全部關閉的時候，先點幾下方塊。打三下方塊會爆炸，過一下會再長出來。</li>
+        <li>從 Sound 開始一項一項打開，每開一項就再點幾下。</li>
+        <li>按 All 全部打開，再點一次，和一開始比較。</li>
+      </ol>
+
+      <h2>每個開關對應一行程式</h2>
+      <div class="scroll">
+        <table>
+          <tr><th>開關</th><th>效果</th><th>程式</th></tr>
+          <tr><td>Sound</td><td>音效</td><td><code>JuiceSfx.Blip(JuiceBlip.Hit);</code></td></tr>
+          <tr><td>Squash</td><td>擠壓拉伸</td><td><code>JuiceSquash.Punch(transform, 0.25f);</code></td></tr>
+          <tr><td>Flash</td><td>閃白</td><td><code>JuiceFlash.Play(gameObject);</code></td></tr>
+          <tr><td>Particles</td><td>粒子</td><td><code>JuiceBurst.Spark(hitPoint);</code></td></tr>
+          <tr><td>Shake</td><td>鏡頭震動</td><td><code>JuiceShake.Add(0.3f);</code></td></tr>
+          <tr><td>Hit Stop</td><td>頓幀</td><td><code>JuiceTime.HitStop(0.06f);</code></td></tr>
+          <tr><td>Text</td><td>傷害數字</td><td><code>Juice.Damage(hitPoint, 12);</code></td></tr>
+        </table>
+      </div>
+      <p style="margin-top: 12px">全部打開，等於這一行：<code>Juice.Hit(enemy.gameObject, hitPoint);</code></p>
+
+      <h2>用在你的 Unity 專案</h2>
+      <p class="lead">在 Unity 專案的資料夾裡開啟 Codex、Claude Code 或 Cursor，貼上這段：</p>
+      <div class="box">
+        <pre id="prompt">請幫我安裝 Juice Skills：先 git clone https://github.com/yayapipi/unity-juice-skills ，再照裡面 INSTALL.md 的步驟，把 Skills 和 Juice Kit 裝進這個 Unity 專案。</pre>
+        <div class="row">
+          <a href="https://github.com/yayapipi/unity-juice-skills">github.com/yayapipi/unity-juice-skills</a>
+          <button id="copy" type="button">複製</button>
+        </div>
+      </div>
+
+      <footer>Unity Juice Skills {{{ PRODUCT_VERSION }}}，MIT 授權。畫面與聲音全部由程式產生，沒有使用任何素材。</footer>
+    </main>
+
+    <script src="Build/{{{ LOADER_FILENAME }}}"></script>
+    <script>
+      var canvas = document.querySelector("#unity-canvas");
+      var loading = document.querySelector("#loading");
+      var loadingText = document.querySelector("#loading-text");
+      var loadingBar = document.querySelector("#loading-bar");
+
+      function showError(message) {
+        loading.style.display = "flex";
+        loadingBar.parentElement.style.display = "none";
+        loadingText.textContent = "載入失敗：" + message;
+      }
+
+      document.querySelector("#copy").onclick = function () {
+        var button = this;
+        var text = document.querySelector("#prompt").textContent;
+        var done = function () { button.textContent = "已複製"; setTimeout(function () { button.textContent = "複製"; }, 1500); };
+        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, function () {});
+      };
+
+      createUnityInstance(canvas, {
+        arguments: [],
+        dataUrl: "Build/{{{ DATA_FILENAME }}}",
+        frameworkUrl: "Build/{{{ FRAMEWORK_FILENAME }}}",
+#if USE_WASM
+        codeUrl: "Build/{{{ CODE_FILENAME }}}",
+#endif
+#if SYMBOLS_FILENAME
+        symbolsUrl: "Build/{{{ SYMBOLS_FILENAME }}}",
+#endif
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: {{{ JSON.stringify(COMPANY_NAME) }}},
+        productName: {{{ JSON.stringify(PRODUCT_NAME) }}},
+        productVersion: {{{ JSON.stringify(PRODUCT_VERSION) }}},
+        showBanner: function (message, type) { if (type == "error") showError(message); },
+      }, function (progress) {
+        loadingBar.style.width = Math.round(100 * progress) + "%";
+      }).then(function (unityInstance) {
+        loading.style.display = "none";
+        document.querySelector("#fullscreen").onclick = function () { unityInstance.SetFullscreen(1); };
+      }).catch(function (message) {
+        showError(message);
+      });
+    </script>
+  </body>
+</html>

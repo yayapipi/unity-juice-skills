@@ -4,7 +4,9 @@
 
 不需要付費插件，不需要任何素材，MIT 授權。
 
-![Juice Kit 的示範場景：方塊被打到時閃白、噴出火花、跳出傷害數字](docs/demo.png)
+**▶ [線上試玩 Demo](https://yayapipi.github.io/unity-juice-skills/)**：不用安裝，在瀏覽器裡點方塊，把回饋一項一項打開。
+
+[![Juice Kit 的示範場景：方塊被打到時閃白、噴出火花、跳出傷害數字](docs/demo.png)](https://yayapipi.github.io/unity-juice-skills/)
 
 ## 這是什麼
 
@@ -128,7 +130,9 @@ UI 元件掛上去就會動：`JuiceButton`（按鈕）、`JuiceCounter`（數�
 
 ## 示範場景
 
-裝好 Juice Kit 之後，Unity 選單 `Tools ▸ Juice ▸ Create Demo Scene`，按 Play。
+不用開 Unity 也能玩：[線上 Demo](https://yayapipi.github.io/unity-juice-skills/)（網頁版的做法在 [webdemo](webdemo/README.md)）。
+
+在自己的專案裡看：裝好 Juice Kit 之後，Unity 選單 `Tools ▸ Juice ▸ Create Demo Scene`，按 Play。
 
 畫面左邊有七個開關：音效、擠壓拉伸、閃白、粒子、鏡頭震動、頓幀、傷害數字。一開始全部關閉，用滑鼠點方塊，再一項一項打開，就能感受同一個遊戲差在哪裡。
 
@@ -195,4 +199,4 @@ Paste this to your agent from inside a Unity project:
 Install Juice Skills: git clone https://github.com/yayapipi/unity-juice-skills and follow its INSTALL.md to add the skills and the Juice Kit to this Unity project.
 ```
 
-Then ask for what you want, for example "add juice to my game, starting with the three moments that matter most". The skill instructions are written in Traditional Chinese; agents handle them fine in any language. Tested on Unity 6000.5 with URP and the Built-in pipeline. MIT licensed.
+Try the [live demo](https://yayapipi.github.io/unity-juice-skills/) in your browser first. Then ask for what you want, for example "add juice to my game, starting with the three moments that matter most". The skill instructions are written in Traditional Chinese; agents handle them fine in any language. Tested on Unity 6000.5 with URP and the Built-in pipeline. MIT licensed.
